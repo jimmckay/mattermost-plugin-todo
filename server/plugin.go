@@ -269,6 +269,8 @@ func (p *Plugin) handleList(w http.ResponseWriter, r *http.Request) {
 		listID = OutListKey
 	case InFlag:
 		listID = InListKey
+	case DoneFlag:
+		listID = DoneListKey
 	}
 
 	issues, err := p.listManager.GetIssueList(userID, listID)
@@ -380,7 +382,7 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.sendRefreshEvent(userID, []string{listToUpdate})
+	p.sendRefreshEvent(userID, []string{listToUpdate, DoneListKey})
 
 	p.trackCompleteIssue(userID)
 
@@ -506,8 +508,10 @@ func (p *Plugin) handleConfig(w http.ResponseWriter, r *http.Request) {
 		// retrieve client only configurations
 		clientConfig := struct {
 			HideTeamSidebar bool `json:"hide_team_sidebar"`
+			UseIconButtons  bool `json:"use_icon_buttons"`
 		}{
 			HideTeamSidebar: p.configuration.HideTeamSidebar,
+			UseIconButtons:  p.configuration.UseIconButtons,
 		}
 
 		configJSON, err := json.Marshal(clientConfig)
@@ -536,6 +540,7 @@ func (p *Plugin) sendRefreshEvent(userID string, lists []string) {
 func (p *Plugin) sendConfigUpdateEvent() {
 	clientConfigMap := map[string]interface{}{
 		"hide_team_sidebar": p.configuration.HideTeamSidebar,
+		"use_icon_buttons":  p.configuration.UseIconButtons,
 	}
 
 	p.API.PublishWebSocketEvent(

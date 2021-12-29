@@ -165,6 +165,11 @@ func (l *listStore) GetIssueListAndReference(userID, issueID string) (string, *I
 		return InListKey, ir, n
 	}
 
+	ir, n, _ = l.GetIssueReference(userID, issueID, DoneListKey)
+	if ir != nil {
+		return DoneListKey, ir, n
+	}
+
 	return "", nil, 0
 }
 

@@ -5,12 +5,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {makeStyleFromTheme, changeOpacity} from 'mattermost-redux/utils/theme_utils';
-
-import RemoveButton from '../buttons/remove';
-import CompleteButton from '../buttons/complete';
-import AcceptButton from '../buttons/accept';
-import BumpButton from '../buttons/bump';
-import {canComplete, canRemove, canAccept, canBump, handleFormattedTextClick} from '../../utils';
+import {canComplete, canRemove, canAccept, canBump, canDecline, handleFormattedTextClick} from '../../utils';
+import IssueButton from './issue_button';
 
 const PostUtils = window.PostUtils; // import the post utilities
 
@@ -18,7 +14,6 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 function ToDoIssues(props) {
     const style = getStyle(props.theme);
-
     const handleClick = (e) => handleFormattedTextClick(e);
 
     return props.issues.length > 0 ? props.issues.map((issue) => {
@@ -31,23 +26,32 @@ function ToDoIssues(props) {
         const seconds = '0' + date.getSeconds();
         const formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
         const formattedDate = month + ' ' + day + ', ' + year;
-
         const htmlFormattedText = PostUtils.formatText(issue.message, {siteURL: props.siteURL});
         const issueComponent = PostUtils.messageHtmlToComponent(htmlFormattedText);
 
         let createdMessage = 'Created ';
         let listPositionMessage = '';
-        if (issue.user) {
-            if (issue.list === '') {
+        if (issue.user !== '') {
+            switch (issue.list) {
+            case 'in' :
                 createdMessage = 'Sent to ' + issue.user;
-                listPositionMessage = 'Accepted. On position ' + (issue.position + 1) + '.';
-            } else if (issue.list === 'in') {
-                createdMessage = 'Sent to ' + issue.user;
-                listPositionMessage = 'In Inbox on position ' + (issue.position + 1) + '.';
-            } else if (issue.list === 'out') {
+                listPositionMessage = 'In Inbox at position ' + (issue.position + 1) + '.';
+                break;
+            case 'done':
+                createdMessage = 'Completed by ' + issue.user;
+                listPositionMessage = '';
+                break;
+            case 'out' :
                 createdMessage = 'Received from ' + issue.user;
                 listPositionMessage = '';
+                break;
+            default:
+                createdMessage = 'Sent to ' + issue.user;
+                listPositionMessage = 'Accepted. At position ' + (issue.position + 1) + '.';
             }
+        } else if (props.list === 'out') {
+            createdMessage = 'User declined ';
+            listPositionMessage = '';
         }
 
         const listDiv = (
@@ -60,40 +64,70 @@ function ToDoIssues(props) {
         );
 
         const removeButton = (
-            <RemoveButton
+            <IssueButton
                 issueId={issue.id}
-                remove={props.remove}
+                actionFunc={props.remove}
                 list={props.list}
+                useIconButtons={props.useIconButtons}
+                icon='icon-trash-can-outline'
+                caption='Delete'
+                tooltip='Delete Item'
             />
         );
 
         const acceptButton = (
-            <AcceptButton
+            <IssueButton
                 issueId={issue.id}
-                accept={props.accept}
-            />
+                actionFunc={props.accept}
+                useIconButtons={props.useIconButtons}
+                icon='icon-playlist-check'
+                caption='Accept this task'
+                tooltip='Accept this task and add to your Todos'
+                            />
         );
 
         const completeButton = (
-            <CompleteButton
+            <IssueButton
                 issueId={issue.id}
-                complete={props.complete}
+                actionFunc={props.complete}
+                useIconButtons={props.useIconButtons}
+                icon='icon-check'
+                caption='Done'
+                tooltip='Mark as Done'
             />
         );
 
         const bumpButton = (
-            <BumpButton
+            <IssueButton
                 issueId={issue.id}
-                bump={props.bump}
+                actionFunc={props.bump}
+                useIconButtons={props.useIconButtons}
+                icon='icon-update'
+                caption='Bump'
+                tooltip='Bump item to top of Users list'
+            />
+        );
+        const declineButton = (
+            <IssueButton
+                issueId={issue.id}
+                action={props.remove}
+                useIconButtons={props.useIconButtons}
+                icon='icon-cancel'
+                caption='Decline'
+                tooltip='Decline this task'
             />
         );
 
-        const actionButtons = (<div className='action-buttons'>
-            {canRemove(props.list, issue.list) && removeButton}
-            {canAccept(props.list) && acceptButton}
-            {canComplete(props.list) && completeButton}
-            {canBump(props.list, issue.list) && bumpButton}
-        </div>);
+        const actionButtons = (
+            <div
+                className='action-buttons'
+            >
+                {canComplete(props.list) && (completeButton)}
+                {canAccept(props.list, issue.list) && acceptButton}
+                {canBump(props.list, issue.list) && bumpButton}
+                {canRemove(props.list) && removeButton}
+                {canDecline(props.list) && declineButton}
+            </div>);
 
         return (
             <div
@@ -101,22 +135,26 @@ function ToDoIssues(props) {
                 style={style.container}
             >
                 <div
-                    className='todo-text'
-                    onClick={handleClick}
+                    style={style.subcontainer}
                 >
-                    {issueComponent}
+                    <div
+                        className='todo-text'
+                        onClick={handleClick}
+                    >
+                        {issueComponent}
+                    </div>
+                    <div
+                        className='light'
+                        style={style.subtitle}
+                    >
+                        {createdMessage + ' on ' + formattedDate + ' at ' + formattedTime}
+                        {listPositionMessage && listDiv}
+                    </div>
                 </div>
-                {(canRemove(props.list, issue.list) || canComplete(props.list) || canAccept(props.list) || canBump(props.list, issue.list)) && actionButtons}
-                <div
-                    className='light'
-                    style={style.subtitle}
-                >
-                    {createdMessage + ' on ' + formattedDate + ' at ' + formattedTime}
-                </div>
-                {listPositionMessage && listDiv}
+                {(canRemove(props.list, issue.list) || canComplete(props.list) || canAccept(props.list) || canBump(props.list, issue.list) || canDecline(props.list)) && actionButtons}
             </div>
         );
-    }) : <div style={style.container}>{'You have no Todo issues'}</div>;
+    }) : <div style={style.container}>{'Nothing to display.'}</div>;
 }
 
 ToDoIssues.propTypes = {
@@ -128,13 +166,20 @@ ToDoIssues.propTypes = {
     accept: PropTypes.func.isRequired,
     bump: PropTypes.func.isRequired,
     siteURL: PropTypes.string.isRequired,
+    useIconButtons: PropTypes.bool.isRequired,
 };
 
 const getStyle = makeStyleFromTheme((theme) => {
     return {
         container: {
-            padding: '15px',
+            display: 'flex',
+            padding: '5px',
+            paddingLeft: '15px',
             borderTop: `1px solid ${changeOpacity(theme.centerChannelColor, 0.2)}`,
+        },
+        subcontainer: {
+            flex: '1',
+            paddingRight: '5px',
         },
         issueTitle: {
             color: theme.centerChannelColor,

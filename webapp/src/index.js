@@ -5,7 +5,7 @@ import {id as pluginId} from './manifest';
 import Root from './components/root';
 import SidebarRight from './components/sidebar_right';
 
-import {openRootModal, list, setShowRHSAction, telemetry, updateConfig, setHideTeamSidebar} from './actions';
+import {openRootModal, list, setShowRHSAction, telemetry, updateConfig, setHideTeamSidebar, setUseIconButtons} from './actions';
 import reducer from './reducer';
 import PostTypeTodo from './components/post_type_todo';
 import TeamSidebar from './components/team_sidebar';
@@ -13,13 +13,13 @@ import ChannelHeaderButton from './components/channel_header_button';
 
 let activityFunc;
 let lastActivityTime = Number.MAX_SAFE_INTEGER;
+
 const activityTimeout = 60 * 60 * 1000; // 1 hour
 
 export default class Plugin {
     initialize(registry, store) {
         registry.registerReducer(reducer);
         registry.registerRootComponent(Root);
-
         registry.registerBottomTeamSidebarComponent(TeamSidebar);
 
         registry.registerPostDropdownMenuAction(
@@ -54,6 +54,9 @@ export default class Plugin {
             case '_out':
                 frontendListName = 'out';
                 break;
+            case '_done':
+                frontendListName = 'done';
+                break;
             default:
                 frontendListName = 'my';
                 break;
@@ -61,7 +64,7 @@ export default class Plugin {
             return frontendListName;
         };
 
-        const refresh = ({data: {lists}}) => lists.forEach((listName) => store.dispatch(list(false, getFrontendListName(listName))));
+        const refresh = ({ data }) => data ? (data.lists.forEach((listName) => store.dispatch(list(false, getFrontendListName(listName)))) ) : (null)
 
         registry.registerWebSocketEventHandler(`custom_${pluginId}_refresh`, refresh);
         registry.registerReconnectHandler(refresh);
@@ -70,12 +73,15 @@ export default class Plugin {
         store.dispatch(list(false, 'in'));
         store.dispatch(list(false, 'out'));
 
+        // store.dispatch(list(false, 'done'));
+
         // register websocket event to track config changes
         const configUpdate = ({data}) => {
             store.dispatch(setHideTeamSidebar(data.hide_team_sidebar));
+            store.dispatch(setUseIconButtons(data.use_icon_buttons));
         };
 
-        registry.registerWebSocketEventHandler(`custom_${pluginId}_config_update`, configUpdate);
+        registry.registerWebSocketEventHandler('custom_'+pluginId+'_config_update', configUpdate);
 
         store.dispatch(updateConfig());
 

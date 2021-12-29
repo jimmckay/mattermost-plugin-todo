@@ -11,6 +11,10 @@ import AutocompleteSelector from '../user_selector/autocomplete_selector.tsx';
 const PostUtils = window.PostUtils;
 
 export default class Root extends React.Component {
+    shouldComponentUpdate() {
+        return true;
+    }
+
     static propTypes = {
         visible: PropTypes.bool.isRequired,
         message: PropTypes.string.isRequired,

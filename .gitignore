@@ -1,1 +1,4 @@
 dist
+webapp/node_modules
+*.log
+launch.json

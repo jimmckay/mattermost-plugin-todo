@@ -3,16 +3,16 @@ import PropTypes from 'prop-types';
 
 import {makeStyleFromTheme} from 'mattermost-redux/utils/theme_utils';
 
-import RemoveButton from '../buttons/remove';
-import CompleteButton from '../buttons/complete';
 import AcceptButton from '../buttons/accept';
+import DeclineButton from '../buttons/decline';
 
 const PostUtils = window.PostUtils; // import the post utilities
 
 export default class PostTypeTodo extends React.PureComponent {
     static propTypes = {
         post: PropTypes.object.isRequired,
-        pendingAnswer: PropTypes.bool.isRequired,
+
+        // pendingAnswer: PropTypes.bool,
         theme: PropTypes.object.isRequired,
         siteURL: PropTypes.string.isRequired,
         actions: PropTypes.shape({
@@ -47,13 +47,6 @@ export default class PostTypeTodo extends React.PureComponent {
                 className='todo-post'
                 style={style.body}
             >
-                <RemoveButton
-                    issueId={this.props.post.props.issueId}
-                    remove={(issueID) => {
-                        this.props.actions.telemetry('custom_post_remove');
-                        this.props.actions.remove(issueID);
-                    }}
-                />
                 <AcceptButton
                     issueId={this.props.post.props.issueId}
                     accept={(issueID) => {
@@ -61,11 +54,11 @@ export default class PostTypeTodo extends React.PureComponent {
                         this.props.actions.accept(issueID);
                     }}
                 />
-                <CompleteButton
+                <DeclineButton
                     issueId={this.props.post.props.issueId}
-                    complete={(issueID) => {
-                        this.props.actions.telemetry('custom_post_complete');
-                        this.props.actions.complete(issueID);
+                    remove={(issueID) => {
+                        this.props.actions.telemetry('custom_post_remove');
+                        this.props.actions.remove(issueID);
                     }}
                 />
             </div>
@@ -82,7 +75,7 @@ export default class PostTypeTodo extends React.PureComponent {
                             </h1>
                             {subtitle}
                             <div>
-                                {this.props.pendingAnswer && content}
+                                {content}
                             </div>
                         </div>
                     </div>

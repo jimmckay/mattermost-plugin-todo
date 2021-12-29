@@ -15,6 +15,7 @@ const (
 	MyFlag            = "my"
 	InFlag            = "in"
 	OutFlag           = "out"
+	DoneFlag          = "done"
 )
 
 func getHelp() string {
@@ -268,6 +269,8 @@ func (p *Plugin) runListCommand(args []string, extra *model.CommandArgs) (bool, 
 		case OutFlag:
 			listID = OutListKey
 			responseMessage = "Sent Todo list:\n\n"
+		case DoneFlag:
+			listID = DoneListKey
 		default:
 			p.postCommandResponse(extra, getHelp())
 			return true, nil
@@ -279,7 +282,7 @@ func (p *Plugin) runListCommand(args []string, extra *model.CommandArgs) (bool, 
 		return false, err
 	}
 
-	p.sendRefreshEvent(extra.UserId, []string{MyListKey, OutListKey, InListKey})
+	p.sendRefreshEvent(extra.UserId, []string{MyListKey, OutListKey, InListKey, DoneListKey})
 
 	responseMessage += issuesListToString(issues)
 	p.postCommandResponse(extra, responseMessage)

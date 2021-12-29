@@ -21,6 +21,7 @@ import (
 // copy appropriate for your types.
 type configuration struct {
 	HideTeamSidebar bool `json:"hide_team_sidebar"`
+	UseIconButtons  bool `json:"use_icon_buttons"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -77,7 +78,7 @@ func (p *Plugin) setConfiguration(configuration *configuration) {
 
 // Check whether client configuration are different
 func (p *Plugin) hasClientConfigChanged(prev *configuration, current *configuration) bool {
-	return prev == nil || prev.HideTeamSidebar != current.HideTeamSidebar
+	return prev == nil || prev.HideTeamSidebar != current.HideTeamSidebar || prev.UseIconButtons != current.UseIconButtons
 }
 
 // OnConfigurationChange is invoked when configuration changes may have been made.

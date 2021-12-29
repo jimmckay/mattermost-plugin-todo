@@ -19,6 +19,8 @@ export const getMessage = (state) => {
 export const getIssues = (state) => getPluginState(state).issues;
 export const getInIssues = (state) => getPluginState(state).inIssues;
 export const getOutIssues = (state) => getPluginState(state).outIssues;
+export const getDoneIssues = (state) => getPluginState(state).doneIssues;
+
 export const getCurrentTeamRoute = (state) => {
     const basePath = getSiteURL();
     const teamName = state.entities.teams.teams[state.entities.teams.currentTeamId].name;
@@ -49,3 +51,4 @@ export const getSiteURL = () => {
 
 export const isRhsVisible = (state) => getPluginState(state).isRhsVisible;
 export const isTeamSidebarVisible = (state) => !getPluginState(state).isTeamSidebarHidden;
+export const getUsingIconButtons = (state) => getPluginState(state).getUseIconButtons;

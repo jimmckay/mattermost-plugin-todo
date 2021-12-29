@@ -4,7 +4,7 @@
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-import {getIssues, getInIssues, getOutIssues, getSiteURL} from '../../selectors';
+import {getIssues, getInIssues, getOutIssues, getDoneIssues, getSiteURL, getUsingIconButtons} from '../../selectors';
 import {remove, list, openRootModal, complete, bump, accept, telemetry, setRhsVisible} from '../../actions';
 
 import SidebarRight from './sidebar_right.jsx';
@@ -13,9 +13,11 @@ function mapStateToProps(state) {
     return {
         todos: getIssues(state),
         inTodos: getInIssues(state),
+        doneTodos: getDoneIssues(state),
         outTodos: getOutIssues(state),
         siteURL: getSiteURL(),
         rhsState: state['plugins-com.mattermost.plugin-todo'].rhsState,
+        useIconButtons: getUsingIconButtons(state),
     };
 }
 

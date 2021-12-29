@@ -1,6 +1,6 @@
 import {combineReducers} from 'redux';
 
-import {OPEN_ROOT_MODAL, CLOSE_ROOT_MODAL, GET_ISSUES, GET_IN_ISSUES, GET_OUT_ISSUES, RECEIVED_SHOW_RHS_ACTION, UPDATE_RHS_STATE, SET_RHS_VISIBLE, SET_HIDE_TEAM_SIDEBAR_BUTTONS} from './action_types';
+import {OPEN_ROOT_MODAL, CLOSE_ROOT_MODAL, GET_ISSUES, GET_IN_ISSUES, GET_OUT_ISSUES, GET_DONE_ISSUES, RECEIVED_SHOW_RHS_ACTION, UPDATE_RHS_STATE, SET_RHS_VISIBLE, SET_HIDE_TEAM_SIDEBAR_BUTTONS, SET_USE_ICON_BUTTONS} from './action_types';
 
 const rootModalVisible = (state = false, action) => {
     switch (action.type) {
@@ -51,6 +51,15 @@ const outIssues = (state = [], action) => {
     }
 };
 
+const doneIssues = (state = [], action) => {
+    switch (action.type) {
+    case GET_DONE_ISSUES:
+        return action.data;
+    default:
+        return state;
+    }
+};
+
 function rhsPluginAction(state = null, action) {
     switch (action.type) {
     case RECEIVED_SHOW_RHS_ACTION:
@@ -86,6 +95,14 @@ function isTeamSidebarHidden(state = false, action) {
         return state;
     }
 }
+function getUseIconButtons(state = true, action) {
+    switch (action.type) {
+    case SET_USE_ICON_BUTTONS:
+        return action.payload;
+    default:
+        return state;
+    }
+}
 
 export default combineReducers({
     rootModalVisible,
@@ -93,8 +110,10 @@ export default combineReducers({
     issues,
     inIssues,
     outIssues,
+    doneIssues,
     rhsState,
     rhsPluginAction,
     isRhsVisible,
     isTeamSidebarHidden,
+    getUseIconButtons,
 });

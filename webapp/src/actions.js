@@ -10,9 +10,11 @@ import {
     GET_ISSUES,
     GET_IN_ISSUES,
     GET_OUT_ISSUES,
+    GET_DONE_ISSUES,
     UPDATE_RHS_STATE,
     SET_RHS_VISIBLE,
     SET_HIDE_TEAM_SIDEBAR_BUTTONS,
+    SET_USE_ICON_BUTTONS,
 } from './action_types';
 
 export const openRootModal = (postID) => (dispatch) => {
@@ -54,6 +56,7 @@ export function updateRhsState(rhsState) {
 }
 
 // TODO: Move this into mattermost-redux or mattermost-webapp.
+
 export const getPluginServerRoute = (state) => {
     const config = getConfig(state);
 
@@ -105,6 +108,9 @@ export const list = (reminder = false, listName = 'my') => async (dispatch, getS
         break;
     case 'out':
         actionType = GET_OUT_ISSUES;
+        break;
+    case 'done':
+        actionType = GET_DONE_ISSUES;
         break;
     }
 
@@ -158,6 +164,13 @@ export function setHideTeamSidebar(payload) {
     };
 }
 
+export function setUseIconButtons(payload) {
+    return {
+        type: SET_USE_ICON_BUTTONS,
+        payload,
+    };
+}
+
 export const updateConfig = () => async (dispatch, getState) => {
     let resp;
     let data;
@@ -171,6 +184,7 @@ export const updateConfig = () => async (dispatch, getState) => {
     }
 
     dispatch(setHideTeamSidebar(data.hide_team_sidebar));
+    dispatch(setUseIconButtons(data.use_icon_buttons));
 
     return {data};
 };

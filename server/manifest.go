@@ -18,7 +18,7 @@ const manifestStr = `
   "homepage_url": "https://github.com/mattermost/mattermost-plugin-todo",
   "support_url": "https://github.com/mattermost/mattermost-plugin-todo/issues",
   "release_notes_url": "https://github.com/mattermost/mattermost-plugin-todo/releases/tag/v0.4.0",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "min_server_version": "5.12.0",
   "server": {
     "executables": {
@@ -32,7 +32,7 @@ const manifestStr = `
     "bundle_path": "webapp/dist/main.js"
   },
   "settings_schema": {
-    "header": "",
+    "header": "This plugin makes it easy to keep track of Todo issues and get daily reminders.",
     "footer": "",
     "settings": [
       {
@@ -40,6 +40,14 @@ const manifestStr = `
         "display_name": "Hide team sidebar buttons:",
         "type": "bool",
         "help_text": "When true, the buttons in the team sidebar on the left toolbar will be hidden.",
+        "placeholder": "",
+        "default": null
+      },
+      {
+        "key": "use_icon_buttons",
+        "display_name": "Use Icon Buttons:",
+        "type": "bool",
+        "help_text": "When true, the buttons in the todo list will appear as more compact icon buttons.",
         "placeholder": "",
         "default": null
       }

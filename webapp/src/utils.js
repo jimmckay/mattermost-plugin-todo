@@ -2,16 +2,20 @@ import {blendColors, changeOpacity, makeStyleFromTheme} from 'mattermost-redux/u
 
 import Constants from './constants';
 
-export function canRemove(myList, foreignList) {
-    return myList === 'my' || myList === 'in' || foreignList === 'in';
+export function canRemove(myList) {
+    return myList === 'my' || myList === 'out' || myList === 'done';
+}
+
+export function canDecline(myList) {
+    return myList === 'in';
 }
 
 export function canComplete(myList) {
-    return myList === 'my' || myList === 'in';
+    return myList === 'my';
 }
 
-export function canAccept(myList) {
-    return myList === 'in';
+export function canAccept(myList, foreignList) {
+    return myList === 'in' && foreignList === 'out';
 }
 
 export function canBump(myList, foreignList) {

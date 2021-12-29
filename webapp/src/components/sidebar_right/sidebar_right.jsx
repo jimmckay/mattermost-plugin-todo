@@ -36,15 +36,18 @@ export function renderThumbVertical(props) {
 const MyListName = 'my';
 const OutListName = 'out';
 const InListName = 'in';
+const DoneListName = 'done';
 
 export default class SidebarRight extends React.PureComponent {
     static propTypes = {
         todos: PropTypes.arrayOf(PropTypes.object),
         inTodos: PropTypes.arrayOf(PropTypes.object),
+        doneTodos: PropTypes.arrayOf(PropTypes.object),
         outTodos: PropTypes.arrayOf(PropTypes.object),
         theme: PropTypes.object.isRequired,
         siteURL: PropTypes.string.isRequired,
         rhsState: PropTypes.string,
+        useIconButtons: PropTypes.bool.isRequired,
         actions: PropTypes.shape({
             remove: PropTypes.func.isRequired,
             complete: PropTypes.func.isRequired,
@@ -64,6 +67,7 @@ export default class SidebarRight extends React.PureComponent {
             list: props.rhsState || MyListName,
             showInbox: true,
             showMy: true,
+            useIconButtons: props.useIconButtons,
         };
     }
 
@@ -87,6 +91,7 @@ export default class SidebarRight extends React.PureComponent {
         this.props.actions.list(false, 'my');
         this.props.actions.list(false, 'in');
         this.props.actions.list(false, 'out');
+        this.props.actions.list(false, 'done');
         this.props.actions.setVisible(true);
     }
 
@@ -104,6 +109,10 @@ export default class SidebarRight extends React.PureComponent {
         return this.props.inTodos.length;
     }
 
+    getDoneIssues() {
+        return this.props.doneTodos.length;
+    }
+
     getOutIssues() {
         return this.props.outTodos.length;
     }
@@ -113,58 +122,69 @@ export default class SidebarRight extends React.PureComponent {
     }
 
     render() {
+        // console.log(this.props.useIconButtons);
         let todos = [];
         let addButton = '';
-        let inboxList = [];
-        switch (this.state.list) {
+        let theList = this.state.list;
+
+        addButton = 'New Todo';
+        switch (theList) {
         case MyListName:
             todos = this.props.todos || [];
-            addButton = 'Add new Todo';
-            inboxList = this.props.inTodos || [];
+            break;
+        case InListName:
+            todos = this.props.inTodos || [];
             break;
         case OutListName:
             todos = this.props.outTodos || [];
-            addButton = 'Request a Todo from someone';
+            break;
+        case DoneListName:
+            todos = this.props.doneTodos || [];
             break;
         }
-
-        let inbox;
-        if (inboxList.length > 0) {
-            const actionName = this.state.showInbox ? 'collapse' : 'expand';
-            inbox = (
-                <div>
-                    <div
-                        className='todo-separator'
-                        onClick={() => this.toggleInbox()}
-                    >
-                        {`Incoming Todos (${inboxList.length}) (${actionName})`}
-                    </div>
-                    {this.state.showInbox ?
-                        <ToDoIssues
-                            issues={inboxList}
-                            theme={this.props.theme}
-                            list={InListName}
-                            remove={this.props.actions.remove}
-                            complete={this.props.actions.complete}
-                            accept={this.props.actions.accept}
-                            bump={this.props.actions.bump}
-                        /> : ''}
-                </div>
-            );
+        if (todos.length === 0) {
+            todos = this.props.todos;
+            theList = (MyListName);
         }
 
-        let separator;
-        if ((inboxList.length > 0) && (todos.length > 0)) {
-            const actionName = this.state.showMy ? 'collapse' : 'expand';
-            separator = (
-                <div
-                    className='todo-separator'
-                    onClick={() => this.toggleMy()}
-                >
-                    {`My Todos (${todos.length}) (${actionName})`}
-                </div>
-            );
-        }
+        // let inbox;
+        // if (inboxList.length > 0) {
+        //     const actionName = this.state.showInbox ? 'collapse' : 'expand';
+        //     inbox = (
+        //         <div>
+        //             <div
+        //                 className='todo-separator'
+        //                 onClick={() => this.toggleInbox()}
+        //             >
+        //                 {`Incoming Todos (${inboxList.length}) (${actionName})`}
+        //             </div>
+        //             {this.state.showInbox ? (
+        //                 <ToDoIssues
+        //                     issues={inboxList}
+        //                     theme={this.props.theme}
+        //                     list={InListName}
+        //                     remove={this.props.actions.remove}
+        //                     complete={this.props.actions.complete}
+        //                     accept={this.props.actions.accept}
+        //                     bump={this.props.actions.bump}
+        //                     useIconButtons={this.props.useIconButtons}
+        //                 />) : ''}
+        //         </div>
+        //     );
+        // }
+
+        // let separator;
+        // if ((inboxList.length > 0) && (todos.length > 0)) {
+        //     const actionName = this.state.showMy ? 'collapse' : 'expand';
+        //     separator = (
+        //         <div
+        //             className='todo-separator'
+        //             onClick={() => this.toggleMy()}
+        //         >
+        //             {`My Todos (${todos.length}) (${actionName})`}
+        //         </div>
+        //     );
+        // }
 
         return (
             <React.Fragment>
@@ -179,22 +199,37 @@ export default class SidebarRight extends React.PureComponent {
                 >
                     <div className='header-menu'>
                         <div
-                            className={'btn btn-primary' + (this.state.list === MyListName ? ' selected' : '')}
+                            className={'btn btn-primary' + (theList === MyListName ? ' selected' : '')}
                             onClick={() => this.openList(MyListName)}
                         >
-                            {'Todos'} {this.getMyIssues() > 0 ? ' (' + this.getMyIssues() + ')' : ''} {this.getInIssues() > 0 ? ' (' + this.getInIssues() + ' received)' : ''}
+                            {'Todos'} {this.getMyIssues() > 0 ? ' (' + this.getMyIssues() + ')' : ''}
                         </div>
-                        <div
-                            className={'btn btn-primary' + (this.state.list === OutListName ? ' selected' : '')}
-                            onClick={() => this.openList(OutListName)}
-                        >
-                            {'Sent'} {this.getOutIssues() > 0 ? ' (' + this.getOutIssues() + ')' : ''}
-                        </div>
+                        {this.getInIssues() > 0 ? (
+                            <div
+                                className={'btn btn-primary' + (theList === InListName ? ' selected' : '')}
+                                onClick={() => this.openList(InListName)}
+                            >
+                                {'Incoming'} { this.getInIssues() > 0 ? (' (' + this.getInIssues() + ')') : '' }
+                            </div>) : '' }
+                        {this.getOutIssues() > 0 ? (
+                            <div
+                                className={'btn btn-primary' + (theList === OutListName ? ' selected' : '')}
+                                onClick={() => this.openList(OutListName)}
+                            >
+                                {'Sent'} { this.getOutIssues() > 0 ? (' (' + this.getOutIssues() + ')') : '' }
+                            </div>) : ''}
+                        {this.getDoneIssues() > 0 ? (
+                            <div
+                                className={'btn btn-primary' + (theList === DoneListName ? ' selected' : '')}
+                                onClick={() => this.openList(DoneListName)}
+                            >
+                                {'Done'} { this.getDoneIssues() > 0 ? (' (' + this.getDoneIssues() + ')') : '' }
+                            </div>) : ''}
                     </div>
                     <div
                         className='section-header'
                         onClick={() => {
-                            this.props.actions.telemetry('rhs_add', {list: this.state.list});
+                            this.props.actions.telemetry('rhs_add', {list: theList});
                             this.props.actions.openRootModal('');
                         }}
                     >
@@ -202,19 +237,20 @@ export default class SidebarRight extends React.PureComponent {
                         <i className='icon fa fa-plus-circle'/>
                     </div>
                     <div>
-                        {inbox}
-                        {separator}
-                        {(inboxList.length === 0) || (this.state.showMy && todos.length > 0) ?
+                        {/* {inbox} */}
+                        {/* {separator} */}
+                        {(todos.length > 0) ? (
                             <ToDoIssues
                                 issues={todos}
                                 theme={this.props.theme}
-                                list={this.state.list}
+                                list={theList}
                                 remove={this.props.actions.remove}
                                 complete={this.props.actions.complete}
                                 accept={this.props.actions.accept}
                                 bump={this.props.actions.bump}
                                 siteURL={this.props.siteURL}
-                            /> : ''}
+                                useIconButtons={this.state.useIconButtons}
+                            />) : <div>{'Nothing here!'}</div>}
                     </div>
                 </Scrollbars>
             </React.Fragment>
